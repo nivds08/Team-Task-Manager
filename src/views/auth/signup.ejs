@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signup</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h2>Create account</h2>
+      <form id="signupForm" class="card">
+        <label>Name <input type="text" name="name" minlength="2" required /></label>
+        <label>Email <input type="email" name="email" required /></label>
+        <label>Password <input type="password" name="password" minlength="6" required /></label>
+        <label>
+          Role
+          <select name="role">
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <button class="btn" type="submit">Signup</button>
+      </form>
+      <p>Already have an account? <a href="/login">Login</a></p>
+      <p id="message"></p>
+    </main>
+    <script>
+      const form = document.getElementById("signupForm");
+      const message = document.getElementById("message");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const formData = new FormData(form);
+        const payload = Object.fromEntries(formData.entries());
+        const response = await fetch("/api/auth/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          message.textContent = data.message || "Signup failed";
+          return;
+        }
+        window.location.href = "/app";
+      });
+    </script>
+  </body>
+</html>
