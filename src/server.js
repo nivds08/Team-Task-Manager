@@ -4,7 +4,8 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const morgan = require("morgan");
-const connectDb = require("./config/db");
+const prisma = require("./config/prisma");
+const { seedRoles } = require("./config/seed");
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskRoutes = require("./routes/taskRoutes");
@@ -36,13 +37,29 @@ app.use((err, req, res, next) => {
   return res.status(500).json({ message: "Internal server error", error: err.message });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 
-connectDb()
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-  })
-  .catch((error) => {
-    console.error("Failed to connect database", error.message);
-    process.exit(1);
-  });
+const bootstrap = async () => {
+  if (!PORT) {
+    throw new Error("PORT is required in environment variables");
+  }
+
+  try {
+    if (!process.env.DATABASE_URL) {
+      throw new Error("DATABASE_URL is required in environment variables");
+    }
+
+    await prisma.$connect();
+    await seedRoles();
+    console.log("Connected to PostgreSQL");
+  } catch (error) {
+    console.error(`Database unavailable at startup: ${error.message}`);
+  }
+
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+};
+
+bootstrap().catch((error) => {
+  console.error("Failed to bootstrap server", error.message);
+  process.exit(1);
+});

@@ -1,22 +1,22 @@
 # Project Tracker Web App
 
-Full-stack web app where users can create projects, assign tasks, and track progress with role-based access control (`admin`, `member`).
+Full-stack web app where users can create projects, assign tasks, and track progress with role-based access control (`admin`, `user`).
 
 ## Features
 
 - Authentication: signup/login/logout with JWT (HTTP-only cookie)
 - Role-based access:
   - Admin: create projects, add team members, create tasks, update any task
-  - Member: view assigned tasks/projects and update own task status
+  - User: view assigned tasks/projects and update own task status
 - Project and team management
 - Task management: create, assign, due date, status updates
 - Dashboard: total/todo/in-progress/done/overdue task summary
-- REST APIs with validations and MongoDB relationships
+- REST APIs with validations and PostgreSQL relationships (Prisma ORM)
 
 ## Tech Stack
 
 - Node.js + Express
-- MongoDB + Mongoose
+- PostgreSQL + Prisma ORM
 - EJS + vanilla JS frontend
 
 ## Setup
@@ -27,11 +27,14 @@ Full-stack web app where users can create projects, assign tasks, and track prog
    - `cp .env.example .env` (or create `.env` manually on Windows)
 3. Update `.env`:
    - `PORT=3000`
-   - `MONGO_URI=<your MongoDB URI>`
+   - `DATABASE_URL=<your PostgreSQL connection string>`
    - `JWT_SECRET=<strong secret>`
-4. Run:
+4. Initialize Prisma and apply DB schema:
+   - `npx prisma migrate dev --name init`
+   - `npm run prisma:seed`
+5. Run:
    - `npm run dev`
-5. Open:
+6. Open:
    - `http://localhost:3000`
 
 ## API Endpoints
@@ -45,15 +48,15 @@ Full-stack web app where users can create projects, assign tasks, and track prog
 
 ### Projects
 
-- `GET /api/projects` (admin: all, member: own/team projects)
+- `GET /api/projects` (admin: all, user: own/team projects)
 - `POST /api/projects` (admin only)
 - `PATCH /api/projects/:id/team` (admin only, add team member)
 
 ### Tasks
 
-- `GET /api/tasks` (admin: all, member: assigned)
+- `GET /api/tasks` (admin: all, user: assigned)
 - `POST /api/tasks` (admin only)
-- `PATCH /api/tasks/:id/status` (admin or assigned member)
+- `PATCH /api/tasks/:id/status` (admin or assigned user)
 
 ### Dashboard
 
@@ -72,7 +75,7 @@ Full-stack web app where users can create projects, assign tasks, and track prog
 1. Push this repository to GitHub.
 2. In Railway, click **New Project** -> **Deploy from GitHub repo**.
 3. Add environment variables in Railway service:
-   - `MONGO_URI`
+   - `DATABASE_URL`
    - `JWT_SECRET`
    - `PORT` (optional; Railway injects one automatically)
 4. Railway detects Node app and runs:
@@ -82,5 +85,5 @@ Full-stack web app where users can create projects, assign tasks, and track prog
 
 ## Notes
 
-- For production, use a managed MongoDB (MongoDB Atlas).
+- For production, use a managed PostgreSQL instance.
 - You can extend team assignment UI with searchable user dropdown instead of raw User ID input.

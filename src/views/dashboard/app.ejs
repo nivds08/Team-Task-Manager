@@ -35,7 +35,7 @@
             <label>Title <input type="text" name="title" required /></label>
             <label>Description <textarea name="description"></textarea></label>
             <label>Project <select name="projectId" id="projectSelect" required></select></label>
-            <label>Assign User ID <input type="text" name="assignedTo" required /></label>
+            <label>Assign User ID <input type="number" min="1" name="assignedTo" required /></label>
             <label>Status
               <select name="status">
                 <option value="todo">Todo</option>
@@ -79,7 +79,7 @@
         try {
           const me = await api("/api/auth/me");
           currentUser = me.user;
-          document.getElementById("userInfo").textContent = `Logged in as ${currentUser.name} (${currentUser.role}) - User ID: ${currentUser._id}`;
+          document.getElementById("userInfo").textContent = `Logged in as ${currentUser.email} (${currentUser.role}) - User ID: ${currentUser.id}`;
           if (currentUser.role !== "admin") {
             document.getElementById("projectCreateCard").style.display = "none";
             document.getElementById("taskCreateCard").style.display = "none";
@@ -105,7 +105,7 @@
         projectsList.innerHTML = projects
           .map((p) => `<li><strong>${p.name}</strong> - ${p.description || "No description"} (Team: ${p.teamMembers.length})</li>`)
           .join("");
-        select.innerHTML = projects.map((p) => `<option value="${p._id}">${p.name}</option>`).join("");
+        select.innerHTML = projects.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
       }
 
       async function loadTasks() {
@@ -115,8 +115,8 @@
           .map(
             (t) => `
           <li>
-            <strong>${t.title}</strong> - ${t.status} | Project: ${t.project?.name || "N/A"} | Assigned: ${t.assignedTo?.name || "N/A"}
-            <select data-task-id="${t._id}">
+            <strong>${t.title}</strong> - ${t.status} | Project: ${t.project?.name || "N/A"} | Assigned: ${t.assignedTo?.email || "N/A"}
+            <select data-task-id="${t.id}">
               <option value="todo" ${t.status === "todo" ? "selected" : ""}>Todo</option>
               <option value="in_progress" ${t.status === "in_progress" ? "selected" : ""}>In Progress</option>
               <option value="done" ${t.status === "done" ? "selected" : ""}>Done</option>
