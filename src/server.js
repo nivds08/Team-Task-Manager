@@ -22,9 +22,12 @@ app.get("/api", (req, res) => {
   res.type("text/plain").send("API is working");
 });
 
+app.get("/test", (req, res) => {
+  res.type("text/plain").send("TEST WORKING");
+});
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
-app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -39,6 +42,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use((err, req, res, next) => {
   console.error(err);
