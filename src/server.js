@@ -13,6 +13,15 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
 
+// Base routes first so deployments and probes get predictable responses
+app.get("/", (req, res) => {
+  res.type("text/plain").send("Server is live");
+});
+
+app.get("/api", (req, res) => {
+  res.type("text/plain").send("API is working");
+});
+
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
@@ -22,7 +31,6 @@ app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("dev"));
 
-app.get("/", (req, res) => res.render("index"));
 app.get("/login", (req, res) => res.render("auth/login"));
 app.get("/signup", (req, res) => res.render("auth/signup"));
 app.get("/app", (req, res) => res.render("dashboard/app"));
