@@ -51,7 +51,11 @@
             message.textContent = data.message || "Login failed";
             return;
           }
-          window.location.href = "/app";
+          const params = new URLSearchParams(window.location.search);
+          const next = params.get("next");
+          const dest =
+            next && next.startsWith("/") && !next.startsWith("//") ? next : "/app";
+          window.location.href = dest;
         } catch {
           message.textContent = "Network error. Try again.";
         } finally {

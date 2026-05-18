@@ -6,12 +6,17 @@ const cors = require("cors");
 const morgan = require("morgan");
 const prisma = require("./config/prisma");
 const { seedRoles } = require("./config/seed");
+const { requireLoginForAppPage, redirectToAppIfLoggedIn } = require("./middleware/webAuthPages");
 const authRoutes = require("./routes/authRoutes");
 const projectRoutes = require("./routes/projectRoutes");
 const taskRoutes = require("./routes/taskRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 
 const app = express();
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 // Base routes first so deployments and probes get predictable responses
 app.get("/", (req, res) => res.render("index"));
@@ -32,9 +37,9 @@ app.use(cookieParser());
 app.use(cors({ origin: true, credentials: true }));
 app.use(morgan("dev"));
 
-app.get("/login", (req, res) => res.render("auth/login"));
-app.get("/signup", (req, res) => res.render("auth/signup"));
-app.get("/app", (req, res) => res.render("dashboard/app"));
+app.get("/login", redirectToAppIfLoggedIn, (req, res) => res.render("auth/login"));
+app.get("/signup", redirectToAppIfLoggedIn, (req, res) => res.render("auth/signup"));
+app.get("/app", requireLoginForAppPage, (req, res) => res.render("dashboard/app"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/projects", projectRoutes);
