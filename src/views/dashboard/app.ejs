@@ -3,173 +3,169 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard</title>
+    <title>Team Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
-  <body>
-    <main class="container">
-      <div class="header-row">
-        <h1>Project Dashboard</h1>
-        <button class="btn secondary" id="logoutBtn">Logout</button>
-      </div>
-      <p id="userInfo"></p>
+  <body class="app-body">
+    <div id="appLoading" class="app-loading" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>Loading your workspace…</p>
+    </div>
 
-      <section class="grid">
-        <div class="card">
-          <h3>Summary</h3>
-          <ul id="summaryList"></ul>
+    <div id="toastHost" class="toast-host" aria-live="polite"></div>
+
+    <div id="appShell" class="app-shell" hidden>
+      <aside class="app-sidebar">
+        <a class="brand" href="/">
+          <span class="brand-mark">◆</span>
+          <span class="brand-text">Ethara<span class="brand-muted">Tasks</span></span>
+        </a>
+
+        <div class="user-card">
+          <div class="user-avatar" id="userAvatar" aria-hidden="true"></div>
+          <div class="user-meta">
+            <div class="user-email" id="userEmail"></div>
+            <span class="role-pill" id="userRole"></span>
+          </div>
         </div>
 
-        <div class="card" id="projectCreateCard">
-          <h3>Create Project (Admin)</h3>
-          <form id="projectForm">
-            <label>Project Name <input type="text" name="name" required /></label>
-            <label>Description <textarea name="description"></textarea></label>
-            <button class="btn" type="submit">Create Project</button>
-          </form>
-        </div>
+        <nav class="side-nav" aria-label="Primary">
+          <button type="button" class="side-nav-btn is-active" data-tab="overview">Dashboard</button>
+          <button type="button" class="side-nav-btn" data-tab="projects">Projects &amp; teams</button>
+        </nav>
 
-        <div class="card" id="taskCreateCard">
-          <h3>Create Task (Admin)</h3>
-          <form id="taskForm">
-            <label>Title <input type="text" name="title" required /></label>
-            <label>Description <textarea name="description"></textarea></label>
-            <label>Project <select name="projectId" id="projectSelect" required></select></label>
-            <label>Assign User ID <input type="number" min="1" name="assignedTo" required /></label>
-            <label>Status
-              <select name="status">
-                <option value="todo">Todo</option>
-                <option value="in_progress">In Progress</option>
-                <option value="done">Done</option>
-              </select>
+        <section id="adminSection" class="admin-stack" hidden>
+          <div class="side-card">
+            <h3>New project</h3>
+            <p class="hint">Admins can create projects and grow the team.</p>
+            <form id="projectForm" class="stack-form">
+              <label class="field">
+                <span>Name</span>
+                <input type="text" name="name" required minlength="3" maxlength="120" placeholder="e.g. Mobile launch" />
+              </label>
+              <label class="field">
+                <span>Description</span>
+                <textarea name="description" rows="2" maxlength="1000" placeholder="Optional context"></textarea>
+              </label>
+              <button class="btn btn-primary btn-block" type="submit">Create project</button>
+            </form>
+          </div>
+
+          <div class="side-card">
+            <h3>New task</h3>
+            <p class="hint">Assign work to someone on the project team.</p>
+            <form id="taskForm" class="stack-form">
+              <label class="field">
+                <span>Title</span>
+                <input type="text" name="title" required minlength="3" maxlength="200" placeholder="Short, actionable title" />
+              </label>
+              <label class="field">
+                <span>Details</span>
+                <textarea name="description" rows="2" maxlength="1500" placeholder="Acceptance criteria, links…"></textarea>
+              </label>
+              <label class="field">
+                <span>Project</span>
+                <select name="projectId" id="projectSelect" required></select>
+              </label>
+              <label class="field">
+                <span>Assignee</span>
+                <select name="assignedTo" id="assignSelect" required disabled></select>
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span>Status</span>
+                  <select name="status">
+                    <option value="todo">Todo</option>
+                    <option value="in_progress">In progress</option>
+                    <option value="done">Done</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>Due date</span>
+                  <input type="date" name="dueDate" />
+                </label>
+              </div>
+              <button class="btn btn-primary btn-block" type="submit">Create task</button>
+            </form>
+          </div>
+        </section>
+
+        <button type="button" class="btn btn-ghost btn-block" id="logoutBtn">Log out</button>
+      </aside>
+
+      <main class="app-main">
+        <header class="main-header">
+          <div>
+            <h1 class="page-title" id="pageHeading">Dashboard</h1>
+            <p class="page-sub" id="pageSub">Track workload, deadlines, and ownership in one place.</p>
+          </div>
+        </header>
+
+        <div id="messageBanner" class="banner" hidden role="status"></div>
+
+        <section class="panel is-active" data-panel="overview">
+          <div class="stats-row">
+            <button type="button" class="stat-card is-active" data-stat-filter="all">
+              <span class="stat-label">All tasks</span>
+              <span class="stat-value" id="summaryTotal">—</span>
+              <span class="stat-hint">Click to clear filters</span>
+            </button>
+            <button type="button" class="stat-card" data-stat-filter="todo">
+              <span class="stat-label">Todo</span>
+              <span class="stat-value" id="summaryTodo">—</span>
+            </button>
+            <button type="button" class="stat-card" data-stat-filter="in_progress">
+              <span class="stat-label">In progress</span>
+              <span class="stat-value" id="summaryProgress">—</span>
+            </button>
+            <button type="button" class="stat-card" data-stat-filter="done">
+              <span class="stat-label">Done</span>
+              <span class="stat-value" id="summaryDone">—</span>
+            </button>
+            <button type="button" class="stat-card stat-card-warn" data-stat-filter="overdue">
+              <span class="stat-label">Overdue</span>
+              <span class="stat-value" id="summaryOverdue">—</span>
+            </button>
+          </div>
+
+          <div class="toolbar">
+            <label class="search-field">
+              <span class="sr-only">Search tasks</span>
+              <input type="search" id="taskSearch" placeholder="Search by title, project, or assignee…" autocomplete="off" />
             </label>
-            <label>Due Date <input type="date" name="dueDate" /></label>
-            <button class="btn" type="submit">Create Task</button>
-          </form>
-        </div>
-      </section>
+          </div>
 
-      <section class="card">
-        <h3>Projects</h3>
-        <ul id="projectsList"></ul>
-      </section>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Task</th>
+                  <th>Project</th>
+                  <th>Assignee</th>
+                  <th>Due</th>
+                  <th>Status</th>
+                  <th>Update</th>
+                </tr>
+              </thead>
+              <tbody id="taskTableBody"></tbody>
+            </table>
+          </div>
+        </section>
 
-      <section class="card">
-        <h3>Tasks</h3>
-        <ul id="tasksList"></ul>
-      </section>
-      <p id="message"></p>
-    </main>
+        <section class="panel" data-panel="projects">
+          <h2 class="section-title">Projects &amp; teams</h2>
+          <p class="section-lead">Every project lists its collaborators. Admins can invite others by user ID.</p>
+          <div id="projectsGrid" class="projects-grid"></div>
+        </section>
+      </main>
+    </div>
 
-    <script>
-      const message = document.getElementById("message");
-      let currentUser = null;
-
-      async function api(url, options = {}) {
-        const response = await fetch(url, {
-          ...options,
-          headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Request failed");
-        return data;
-      }
-
-      async function init() {
-        try {
-          const me = await api("/api/auth/me");
-          currentUser = me.user;
-          document.getElementById("userInfo").textContent = `Logged in as ${currentUser.email} (${currentUser.role}) - User ID: ${currentUser.id}`;
-          if (currentUser.role !== "admin") {
-            document.getElementById("projectCreateCard").style.display = "none";
-            document.getElementById("taskCreateCard").style.display = "none";
-          }
-          await Promise.all([loadDashboard(), loadProjects(), loadTasks()]);
-        } catch (error) {
-          window.location.href = "/login";
-        }
-      }
-
-      async function loadDashboard() {
-        const data = await api("/api/dashboard");
-        const summaryList = document.getElementById("summaryList");
-        summaryList.innerHTML = Object.entries(data.summary)
-          .map(([k, v]) => `<li><strong>${k}</strong>: ${v}</li>`)
-          .join("");
-      }
-
-      async function loadProjects() {
-        const projects = await api("/api/projects");
-        const projectsList = document.getElementById("projectsList");
-        const select = document.getElementById("projectSelect");
-        projectsList.innerHTML = projects
-          .map((p) => `<li><strong>${p.name}</strong> - ${p.description || "No description"} (Team: ${p.teamMembers.length})</li>`)
-          .join("");
-        select.innerHTML = projects.map((p) => `<option value="${p.id}">${p.name}</option>`).join("");
-      }
-
-      async function loadTasks() {
-        const tasks = await api("/api/tasks");
-        const tasksList = document.getElementById("tasksList");
-        tasksList.innerHTML = tasks
-          .map(
-            (t) => `
-          <li>
-            <strong>${t.title}</strong> - ${t.status} | Project: ${t.project?.name || "N/A"} | Assigned: ${t.assignedTo?.email || "N/A"}
-            <select data-task-id="${t.id}">
-              <option value="todo" ${t.status === "todo" ? "selected" : ""}>Todo</option>
-              <option value="in_progress" ${t.status === "in_progress" ? "selected" : ""}>In Progress</option>
-              <option value="done" ${t.status === "done" ? "selected" : ""}>Done</option>
-            </select>
-          </li>`
-          )
-          .join("");
-
-        document.querySelectorAll("#tasksList select").forEach((el) => {
-          el.addEventListener("change", async (e) => {
-            try {
-              await api(`/api/tasks/${e.target.dataset.taskId}/status`, {
-                method: "PATCH",
-                body: JSON.stringify({ status: e.target.value }),
-              });
-              await loadDashboard();
-            } catch (error) {
-              message.textContent = error.message;
-            }
-          });
-        });
-      }
-
-      document.getElementById("projectForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const payload = Object.fromEntries(new FormData(e.target).entries());
-        try {
-          await api("/api/projects", { method: "POST", body: JSON.stringify(payload) });
-          e.target.reset();
-          await loadProjects();
-        } catch (error) {
-          message.textContent = error.message;
-        }
-      });
-
-      document.getElementById("taskForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const payload = Object.fromEntries(new FormData(e.target).entries());
-        try {
-          await api("/api/tasks", { method: "POST", body: JSON.stringify(payload) });
-          e.target.reset();
-          await Promise.all([loadTasks(), loadDashboard()]);
-        } catch (error) {
-          message.textContent = error.message;
-        }
-      });
-
-      document.getElementById("logoutBtn").addEventListener("click", async () => {
-        await api("/api/auth/logout", { method: "POST" });
-        window.location.href = "/login";
-      });
-
-      init();
-    </script>
+    <script src="/js/app.js" defer></script>
   </body>
 </html>

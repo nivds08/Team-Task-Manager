@@ -3,45 +3,67 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Signup</title>
+    <title>Sign up · Team Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <main class="container">
-      <h2>Create account</h2>
+    <main class="auth-hero">
+      <h1>Create your workspace</h1>
+      <p>Sign up as an admin to manage projects, or as a member to work on assigned tasks.</p>
       <form id="signupForm" class="card">
-        <label>Email <input type="email" name="email" required /></label>
-        <label>Password <input type="password" name="password" minlength="6" required /></label>
-        <label>
-          Role
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="username" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" minlength="6" autocomplete="new-password" required />
+        </label>
+        <label class="field">
+          <span>Role</span>
           <select name="role">
-            <option value="user">User</option>
+            <option value="user">Member</option>
             <option value="admin">Admin</option>
           </select>
         </label>
-        <button class="btn" type="submit">Signup</button>
+        <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Sign up</button>
       </form>
-      <p>Already have an account? <a href="/login">Login</a></p>
+      <p class="link-muted">Already have an account? <a href="/login">Log in</a> · <a href="/">Home</a></p>
       <p id="message"></p>
     </main>
     <script>
       const form = document.getElementById("signupForm");
       const message = document.getElementById("message");
+      const submitBtn = document.getElementById("submitBtn");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
-        const payload = Object.fromEntries(formData.entries());
-        const response = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          message.textContent = data.message || "Signup failed";
-          return;
+        message.textContent = "";
+        submitBtn.disabled = true;
+        const payload = Object.fromEntries(new FormData(form).entries());
+        try {
+          const response = await fetch("/api/auth/signup", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            message.textContent = data.message || "Signup failed";
+            return;
+          }
+          window.location.href = "/app";
+        } catch {
+          message.textContent = "Network error. Try again.";
+        } finally {
+          submitBtn.disabled = false;
         }
-        window.location.href = "/app";
       });
     </script>
   </body>

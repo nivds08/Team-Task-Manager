@@ -3,38 +3,60 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Login</title>
+    <title>Log in · Team Task Manager</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="/css/styles.css" />
   </head>
   <body>
-    <main class="container">
-      <h2>Login</h2>
+    <main class="auth-hero">
+      <h1>Welcome back</h1>
+      <p>Log in to open your dashboard, tasks, and projects.</p>
       <form id="loginForm" class="card">
-        <label>Email <input type="email" name="email" required /></label>
-        <label>Password <input type="password" name="password" minlength="6" required /></label>
-        <button class="btn" type="submit">Login</button>
+        <label class="field">
+          <span>Email</span>
+          <input type="email" name="email" autocomplete="username" required />
+        </label>
+        <label class="field">
+          <span>Password</span>
+          <input type="password" name="password" minlength="6" autocomplete="current-password" required />
+        </label>
+        <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Log in</button>
       </form>
-      <p>No account? <a href="/signup">Signup</a></p>
+      <p class="link-muted">No account? <a href="/signup">Create one</a> · <a href="/">Home</a></p>
       <p id="message"></p>
     </main>
     <script>
       const form = document.getElementById("loginForm");
       const message = document.getElementById("message");
+      const submitBtn = document.getElementById("submitBtn");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
-        const formData = new FormData(form);
-        const payload = Object.fromEntries(formData.entries());
-        const response = await fetch("/api/auth/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await response.json();
-        if (!response.ok) {
-          message.textContent = data.message || "Login failed";
-          return;
+        message.textContent = "";
+        submitBtn.disabled = true;
+        const payload = Object.fromEntries(new FormData(form).entries());
+        try {
+          const response = await fetch("/api/auth/login", {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) {
+            message.textContent = data.message || "Login failed";
+            return;
+          }
+          window.location.href = "/app";
+        } catch {
+          message.textContent = "Network error. Try again.";
+        } finally {
+          submitBtn.disabled = false;
         }
-        window.location.href = "/app";
       });
     </script>
   </body>

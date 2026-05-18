@@ -14,9 +14,7 @@ const dashboardRoutes = require("./routes/dashboardRoutes");
 const app = express();
 
 // Base routes first so deployments and probes get predictable responses
-app.get("/", (req, res) => {
-  res.type("text/plain").send("Server is live");
-});
+app.get("/", (req, res) => res.render("index"));
 
 app.get("/api", (req, res) => {
   res.type("text/plain").send("API is working");
